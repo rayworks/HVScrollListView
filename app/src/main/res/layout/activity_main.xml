@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
 
     tools:context="com.andjdk.hvscrollview.MainActivity">
 
     <com.andjdk.hvscrollviewlibrary.HVScrollView
         android:id="@+id/hv_scrollview"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent">
     </com.andjdk.hvscrollviewlibrary.HVScrollView>
 </RelativeLayout>

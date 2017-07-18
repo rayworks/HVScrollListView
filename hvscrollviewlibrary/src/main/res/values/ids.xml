@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="move_layout" />
+    <item name="move_layout" type="id" />
+    <item name="head_view" type="id" />
+    <item name="header_fixed_layout" type="id" />
+    <item name="header_move_layout" type="id" />
 </resources>

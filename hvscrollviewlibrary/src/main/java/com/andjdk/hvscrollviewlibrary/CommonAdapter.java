@@ -27,11 +27,14 @@
 package com.andjdk.hvscrollviewlibrary;
 
 import android.content.Context;
+import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -82,7 +85,24 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = ViewHolder.get(mContext, convertView, parent, layoutId, position);
+        //holder.getConvertView();
+
+        // update the column width
+        int[] widthArray = HVScrollView.getColumnWidthArray();
+
         LinearLayout moveLayout = holder.getView(R.id.move_layout);
+        LinearLayout headLayout = holder.getView(R.id.head_view);
+        int headerChildCount = headLayout.getChildCount();
+        for (int i = 0; i < headerChildCount; i++) {
+            TextView textView = (TextView) headLayout.getChildAt(i);
+            ((LinearLayout.LayoutParams) textView.getLayoutParams()).width = widthArray[i];
+        }
+        for (int j = 0; j < moveLayout.getChildCount(); j++) {
+            TextView textView = (TextView) moveLayout.getChildAt(j);
+            ((LinearLayout.LayoutParams) textView.getLayoutParams()).width = widthArray[j + headerChildCount];
+        }
+
+        holder.getConvertView().requestLayout();
 
         moveLayout.setScrollX(offsetX);
 
@@ -109,5 +129,10 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
 
     public void setHorizontalOffset(int offsetX) {
         this.offsetX = offsetX;
+    }
+
+    @LayoutRes
+    public int getHeaderLayout() {
+        return R.layout.header_def_layout;
     }
 }

@@ -1,83 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/header_panel"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:background="@android:color/holo_orange_dark"
     android:orientation="horizontal">
 
     <LinearLayout
-        android:id="@+id/head_view"
+        android:id="@+id/header_fixed_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/text1"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
+            android:layout_gravity="center"
             android:gravity="center"
             android:text="1" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/move_layout"
+        android:id="@+id/header_move_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/text2"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="2" />
 
         <TextView
             android:id="@+id/text3"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="3" />
 
         <TextView
             android:id="@+id/text4"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="4" />
 
         <TextView
             android:id="@+id/text5"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="5" />
 
         <TextView
             android:id="@+id/text6"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="6" />
 
         <TextView
             android:id="@+id/text7"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="7" />
 
         <TextView
             android:id="@+id/text8"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="8" />
 
         <TextView
             android:id="@+id/text9"
-            android:layout_width="70dp"
+            style="@style/HeaderText"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:gravity="center"
             android:text="9" />
     </LinearLayout>
 </LinearLayout>

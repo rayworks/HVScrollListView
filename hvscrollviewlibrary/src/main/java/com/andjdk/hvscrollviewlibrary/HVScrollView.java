@@ -30,6 +30,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Locale;
 
 import static com.andjdk.hvscrollviewlibrary.DisplayUtil.dip2px;
 
@@ -64,7 +68,7 @@ public class HVScrollView extends RelativeLayout {
     private int[] mMovableListColumnsWidth = null;
 
     private ListView mStockListView;
-    private Object mAdapter;
+    private CommonAdapter mAdapter;
 
     private Collection<View> mMovableViewList;
 
@@ -82,6 +86,7 @@ public class HVScrollView extends RelativeLayout {
     private int mTotalItemCount;
     private int mVisibleItemCount;
     private int mFirstVisibleItem;
+    private int fullScreenWidth;
 
 
     public HVScrollView(Context context) {
@@ -100,24 +105,124 @@ public class HVScrollView extends RelativeLayout {
     private void initView() {
         LinearLayout linearLayout = new LinearLayout(getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.addView(buildHeadLayout());
-        linearLayout.addView(buildMoveableListView());
+
+        View headLayout = buildHeadLayout();
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(totalHeaderWidth,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        linearLayout.addView(headLayout, layoutParams); //totalHeaderWidth
+
+        linearLayout.addView(buildMovableListView());
 
         this.addView(linearLayout, new LayoutParams(LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // flush the layout immediately
+        linearLayout.requestLayout();
+    }
+
+    private LinkedList<String> headerTexts = new LinkedList<>();
+
+    /***
+     * Column width array
+     */
+    private static int[] columnWidthArray;
+
+    public static int[] getColumnWidthArray() {
+        return columnWidthArray;
+    }
+
+    static int totalHeaderWidth = 0;
+
+    public static int getTotalHeaderWidth() {
+        return totalHeaderWidth;
     }
 
     private View buildHeadLayout() {
-        LinearLayout headLayout = new LinearLayout(getContext());
+        // ---------------------------------------
+        // FixedHeaderLayout | MovableHeaderLayout
+        // ---------------------------------------
+        //  FixedBodyLayout  |  MovableBodyLayout
+        //  FixedBodyLayout  |  MovableBodyLayout
+        //  FixedBodyLayout  |  MovableBodyLayout
+        //  FixedBodyLayout  |  MovableBodyLayout
+        //  FixedBodyLayout  |  MovableBodyLayout
+        //  FixedBodyLayout  |  MovableBodyLayout
+        // ---------------------------------------
+        LinkedList<TextView> textViews = new LinkedList<>();
+
+        View headerView = LayoutInflater.from(context).inflate(mAdapter.getHeaderLayout(), null);
+
+        ViewGroup fixedLayout = (ViewGroup) headerView.findViewById(R.id.header_fixed_layout);
+        ViewGroup dynamicLayout = (ViewGroup) headerView.findViewById(R.id.header_move_layout);
+
+        fullScreenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        System.out.println(">>>> full screen width : " + fullScreenWidth);
+
+        mLayoutTitleMovable = (LinearLayout) dynamicLayout;
+
+        TextView textView = null;
+        int fixedChildCount = fixedLayout.getChildCount();
+        for (int i = 0; i < fixedChildCount; i++) {
+            textView = (TextView) fixedLayout.getChildAt(i);
+            textViews.add(textView);
+        }
+        for (int j = 0; j < dynamicLayout.getChildCount(); j++) {
+            textView = (TextView) dynamicLayout.getChildAt(j);
+            textViews.add(textView);
+        }
+
+        headerTexts.addAll(Arrays.asList(mFixLeftListColumnsText));
+        headerTexts.addAll(Arrays.asList(mMovableListColumnsText));
+
+        int headerSize = headerTexts.size();
+        int viewSize = textViews.size();
+        if (headerSize != viewSize) {
+            throw new IllegalArgumentException(String.format(Locale.ENGLISH, "View %d | Text %d",
+                    viewSize, headerSize));
+        }
+
+        columnWidthArray = new int[headerSize];
+        totalHeaderWidth = 0;
+        mMovableTotalWidth = 0;
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        for (int k = 0; k < headerSize; k++) {
+            TextView txt = textViews.get(k);
+            txt.setLayoutParams(layoutParams);
+
+            txt.setText(headerTexts.get(k));
+
+            txt.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) (txt.getLayoutParams());
+
+            columnWidthArray[k] = txt.getMeasuredWidth();
+            totalHeaderWidth += columnWidthArray[k];
+
+            System.out.println(String.format(Locale.ENGLISH, ">>> Index view %d measured width %d",
+                    k, columnWidthArray[k]));
+
+            // reset the Movable width range
+            if (k >= fixedChildCount) {
+                mMovableTotalWidth += columnWidthArray[k];
+                mMovableListColumnsWidth[k - fixedChildCount] = columnWidthArray[k];
+            }
+        }
+        System.out.println(">>> total header width : " + totalHeaderWidth);
+        System.out.println(">>> total Movable header width : " + mMovableTotalWidth);
+
+        /*LinearLayout headLayout = new LinearLayout(getContext());
         headLayout.setGravity(Gravity.CENTER);
         LinearLayout fixHeadLayout = new LinearLayout(getContext());
         addListHeaderTextView(mFixLeftListColumnsText[0], mFixLeftListColumnsWidth[0], fixHeadLayout);
         fixHeadLayout.setGravity(Gravity.CENTER);
+        // 80, 50dp
         headLayout.addView(fixHeadLayout, 0, new ViewGroup.LayoutParams(dip2px(context, mFixViewWidth), dip2px(context, mItemViewHeight)));
 
         mLayoutTitleMovable = new LinearLayout(getContext());
         for (int i = 0; i < mMovableListColumnsText.length; i++) {
-            TextView textView = addListHeaderTextView(mMovableListColumnsText[i], mMovableListColumnsWidth[i], mLayoutTitleMovable);
+            textView = addListHeaderTextView(mMovableListColumnsText[i], mMovableListColumnsWidth[i], mLayoutTitleMovable);
             textView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -127,19 +232,18 @@ public class HVScrollView extends RelativeLayout {
                 }
             });
         }
-        headLayout.addView(mLayoutTitleMovable);
-        return headLayout;
+        headLayout.addView(mLayoutTitleMovable);*/
+
+        return headerView /*headLayout*/;
     }
 
 
-    private View buildMoveableListView() {
+    private View buildMovableListView() {
         RelativeLayout linearLayout = new RelativeLayout(getContext());
         mStockListView = new ListView(getContext());
         if (null != mAdapter) {
-            if (mAdapter instanceof CommonAdapter) {
-                mStockListView.setAdapter((CommonAdapter) mAdapter);
-                mMovableViewList = ((CommonAdapter) mAdapter).getMovableViewList();
-            }
+            mStockListView.setAdapter(mAdapter);
+            mMovableViewList = mAdapter.getMovableViewList();
         }
 
         footerLayout = new LinearLayout(getContext());
@@ -175,7 +279,7 @@ public class HVScrollView extends RelativeLayout {
         mStockListView.setOnItemLongClickListener(mOnItemLongClickListener);
         linearLayout.addView(footerLayout, LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
-        linearLayout.addView(mStockListView, new LayoutParams(LayoutParams.MATCH_PARENT,
+        linearLayout.addView(mStockListView, new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT));
         return linearLayout;
     }
@@ -193,7 +297,12 @@ public class HVScrollView extends RelativeLayout {
         }
     }
 
-    public void setAdapter(Object adapter) {
+    /***
+     * Sets the composite Adapter. It will trigger a layout update.
+     *
+     * @param adapter
+     */
+    public <A extends CommonAdapter> void setAdapter(A adapter) {
         this.mAdapter = adapter;
         initView();
     }
@@ -275,8 +384,8 @@ public class HVScrollView extends RelativeLayout {
                 }
 
             } else {
-                if (mLayoutTitleMovable.getWidth() + Math.abs(mFixX) > MovableTotalWidth()) {
-                    int offsetX = MovableTotalWidth() - mLayoutTitleMovable.getWidth();
+                if (getMovableLayoutLimitWidth() + Math.abs(mFixX) > MovableTotalWidth()) {
+                    int offsetX = MovableTotalWidth() - getMovableLayoutLimitWidth();
                     mLayoutTitleMovable.scrollTo(offsetX, 0);
 
                     updateAdapterViewHorizontalOffset(offsetX);
@@ -288,6 +397,10 @@ public class HVScrollView extends RelativeLayout {
                 }
             }
         }
+    }
+
+    private int getMovableLayoutLimitWidth() {
+        return /*mLayoutTitleMovable.getWidth()*/ fullScreenWidth - mMovableListColumnsWidth[0];
     }
 
     private void updateAdapterViewHorizontalOffset(int offset) {
@@ -318,8 +431,8 @@ public class HVScrollView extends RelativeLayout {
                     if (0 > mMoveOffsetX) {
                         mMoveOffsetX = 0;
                     } else {
-                        if ((mLayoutTitleMovable.getWidth() + mMoveOffsetX) > MovableTotalWidth()) {
-                            mMoveOffsetX = MovableTotalWidth() - mLayoutTitleMovable.getWidth();
+                        if ((getMovableLayoutLimitWidth() + mMoveOffsetX) > MovableTotalWidth()) {
+                            mMoveOffsetX = MovableTotalWidth() - getMovableLayoutLimitWidth();
                         }
                     }
                     mLayoutTitleMovable.scrollTo(mMoveOffsetX, 0);
@@ -342,22 +455,24 @@ public class HVScrollView extends RelativeLayout {
         return super.onTouchEvent(event);
     }
 
-    /**
+    /***
      * 必须先初始化顶部标题栏
      *
-     * @param headerListData
+     * @param fixedHeaderNames
+     * @param movableHeaderNames
      */
-    public void setHeaderListData(String[] headerListData) {
-        if (headerListData == null) {
-            return;
+    public void setHeaderListData(String[] fixedHeaderNames, String[] movableHeaderNames) {
+        if (movableHeaderNames == null || fixedHeaderNames == null) {
+            throw new IllegalArgumentException("Input names can't be null");
         }
-        this.mMovableListColumnsText = headerListData;
-        mMovableListColumnsWidth = new int[headerListData.length];
-        for (int i = 0; i < headerListData.length; i++) {
+
+        this.mMovableListColumnsText = movableHeaderNames;
+        mMovableListColumnsWidth = new int[movableHeaderNames.length];
+        for (int i = 0; i < movableHeaderNames.length; i++) {
             mMovableListColumnsWidth[i] = dip2px(context, mMoveViewWidth);
         }
         mFixLeftListColumnsWidth = new int[]{dip2px(context, mFixViewWidth)};
-        mFixLeftListColumnsText = new String[]{"名称"};
+        mFixLeftListColumnsText = fixedHeaderNames;
     }
 
 
