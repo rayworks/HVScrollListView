@@ -40,8 +40,9 @@ public class MainActivity extends AppCompatActivity {
         //定义顶部栏
         hvScrollView.setHeaderListData(new String[]{" 证券名称 "},
                 new String[]{"最新价", "涨跌幅", "最高价", "最低价", "开盘价", "昨日收盘价", "成交量", "总市值"});
-        mAdapter = new StockListAdapter(this, stockDataInfoList, R.layout.item_layout);
+        mAdapter = new StockListAdapter(this, stockDataInfoList, R.layout.item_layout, hvScrollView);
         hvScrollView.setAdapter(mAdapter);
+
         //点击列表item
         hvScrollView.setOnItemClick(new HVScrollView.OnItemClickedListener() {
             @Override

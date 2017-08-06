@@ -31,7 +31,6 @@ import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -55,12 +54,17 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
     private HashSet<View> movableViewList = new LinkedHashSet<>();
     private LinearLayout moveViewLayout;
 
-    public CommonAdapter(Context mContext,
-                         List<T> mDatas, int layoutId) {
+
+    private HeaderColumnWidthRetriever columnWidthRetriever;
+
+    public CommonAdapter(Context mContext, List<T> mDatas, int layoutId,
+                         HeaderColumnWidthRetriever columnWidthRetriever) {
         super();
+
         this.mContext = mContext;
         this.mDatas = mDatas;
         this.layoutId = layoutId;
+        this.columnWidthRetriever = columnWidthRetriever;
         mInflater = LayoutInflater.from(mContext);
     }
 
@@ -85,10 +89,9 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = ViewHolder.get(mContext, convertView, parent, layoutId, position);
-        //holder.getConvertView();
 
         // update the column width
-        int[] widthArray = HVScrollView.getColumnWidthArray();
+        int[] widthArray = columnWidthRetriever.getHeaderWidth();
 
         LinearLayout moveLayout = holder.getView(R.id.move_layout);
         LinearLayout headLayout = holder.getView(R.id.head_view);

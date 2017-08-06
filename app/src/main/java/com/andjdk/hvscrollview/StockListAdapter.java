@@ -31,9 +31,9 @@ import android.view.View;
 
 
 import com.andjdk.hvscrollviewlibrary.CommonAdapter;
+import com.andjdk.hvscrollviewlibrary.HeaderColumnWidthRetriever;
 import com.andjdk.hvscrollviewlibrary.ViewHolder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -43,8 +43,9 @@ import java.util.List;
 public class StockListAdapter extends CommonAdapter<StockDataInfo> {
 
 
-    public StockListAdapter(Context mContext, List<StockDataInfo> mDatas, int layoutId) {
-        super(mContext, mDatas, layoutId);
+    public StockListAdapter(Context mContext, List<StockDataInfo> mDatas, int layoutId,
+                            HeaderColumnWidthRetriever retriever) {
+        super(mContext, mDatas, layoutId, retriever);
     }
 
     @Override

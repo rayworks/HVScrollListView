@@ -53,7 +53,7 @@ import static com.andjdk.hvscrollviewlibrary.DisplayUtil.dip2px;
 /**
  * Created by andjdk on 2015/11/3.
  */
-public class HVScrollView extends RelativeLayout {
+public class HVScrollView extends RelativeLayout implements HeaderColumnWidthRetriever {
     /**
      * 列表头的高和宽
      */
@@ -131,9 +131,10 @@ public class HVScrollView extends RelativeLayout {
     /***
      * Column width array
      */
-    private static int[] columnWidthArray;
+    private int[] columnWidthArray;
 
-    public static int[] getColumnWidthArray() {
+    @Override
+    public int[] getHeaderWidth() {
         return columnWidthArray;
     }
 
