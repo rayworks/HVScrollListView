@@ -33,6 +33,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -88,6 +89,8 @@ public class HVScrollView extends RelativeLayout {
     private int mFirstVisibleItem;
     private int fullScreenWidth;
 
+    private int touchSlop;
+
 
     public HVScrollView(Context context) {
         this(context, null);
@@ -100,6 +103,9 @@ public class HVScrollView extends RelativeLayout {
     public HVScrollView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
+
+        final ViewConfiguration vc = ViewConfiguration.get(context);
+        touchSlop = vc.getScaledTouchSlop();
     }
 
     private void initView() {
@@ -212,29 +218,7 @@ public class HVScrollView extends RelativeLayout {
         System.out.println(">>> total header width : " + totalHeaderWidth);
         System.out.println(">>> total Movable header width : " + mMovableTotalWidth);
 
-        /*LinearLayout headLayout = new LinearLayout(getContext());
-        headLayout.setGravity(Gravity.CENTER);
-        LinearLayout fixHeadLayout = new LinearLayout(getContext());
-        addListHeaderTextView(mFixLeftListColumnsText[0], mFixLeftListColumnsWidth[0], fixHeadLayout);
-        fixHeadLayout.setGravity(Gravity.CENTER);
-        // 80, 50dp
-        headLayout.addView(fixHeadLayout, 0, new ViewGroup.LayoutParams(dip2px(context, mFixViewWidth), dip2px(context, mItemViewHeight)));
-
-        mLayoutTitleMovable = new LinearLayout(getContext());
-        for (int i = 0; i < mMovableListColumnsText.length; i++) {
-            textView = addListHeaderTextView(mMovableListColumnsText[i], mMovableListColumnsWidth[i], mLayoutTitleMovable);
-            textView.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onHeaderClickedListener != null) {
-                        onHeaderClickedListener.onHeadViewClick(((TextView) v).getText().toString());
-                    }
-                }
-            });
-        }
-        headLayout.addView(mLayoutTitleMovable);*/
-
-        return headerView /*headLayout*/;
+        return headerView;
     }
 
 
@@ -360,7 +344,7 @@ public class HVScrollView extends RelativeLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
                 int offsetX = (int) Math.abs(ev.getX() - mStartX);
-                if (offsetX > 30) {
+                if (offsetX > touchSlop) {
                     return true;
                 } else {
                     return false;
@@ -426,7 +410,7 @@ public class HVScrollView extends RelativeLayout {
                 return true;
             case MotionEvent.ACTION_MOVE:
                 int offsetX = (int) Math.abs(event.getX() - mStartX);
-                if (offsetX > 30) {
+                if (offsetX > touchSlop) {
                     mMoveOffsetX = (int) (mStartX - event.getX() + mFixX);
                     if (0 > mMoveOffsetX) {
                         mMoveOffsetX = 0;
